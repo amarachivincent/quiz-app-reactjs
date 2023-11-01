@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>React Project</title>
+    <meta charset="utf-8"/>
+    <script src="../demo_one/react.development.js"></script>
+    <script src="../demo_one/react-dom.development.js"></script>
+    <script src="../demo_one/babel.min.js"></script>
+    <script src="../demo_one/jquery.min.js"></script>
+    </style>
+</head>
+<body>
+
+<div id="root"></div>
+
+<script type="text/babel">
+
+
+	let list=[{
+
+	question:'This program was coded in what programming language? ',
+	answer:['Reactjs'],
+	optiona:['Php'],
+	optionb:['Java'],
+	optionc:['Python'],
+    score:0,
+    checked:false
+
+	}]
+
+
+
+
+class Header extends React.Component{
+
+
+render()
+{
+ return(
+  <div>
+   <h1>QA - Quiz App Using Trivia API</h1>
+  </div>
+ )
+
+}
+
+}
+
+class Content extends React.Component{
+
+	constructor(props)
+	{
+
+	 super(props);
+
+	}
+
+	render()
+	{
+
+       return(
+
+
+           <div>
+          {this.props.list.map(function(item,i){
+
+          return (
+          <div key={i}>
+          <textarea cols='100' rows='10' value={item.question} readOnly/>
+           <strong>{item.score}</strong>
+          </div>
+           )
+
+          })}
+
+ 			</div>
+
+       )
+
+	}
+
+
+}
+
+class Footer extends React.Component{
+
+constructor(props)
+{
+ super(props);
+
+}
+
+render()
+{
+
+   return(
+    <div>
+<br/>
+    {
+
+
+
+		 this.props.list.map((item,i)=>{
+
+			return(
+			<div key={i} >
+            <input type='radio' name='option' onClick={(event)=>this.props.checkAnswer(event)} value={item.answer} />
+			{item.answer}<br/>
+            <input type='radio' name='option' onClick={(event)=>this.props.checkAnswer(event)} value={item.optiona}/>
+            {item.optiona}<br/>
+            <input type='radio' name='option' onClick={(event)=>this.props.checkAnswer(event)} value={item.optionb} />
+            {item.optionb}<br/>
+             <input type='radio' name='option' onClick={(event)=>this.props.checkAnswer(event)} value={item.optionc} />
+            {item.optionc}<br/>
+            </div>
+
+			)
+
+		 })
+
+
+
+    }
+   <br/> </div>
+
+
+   )
+
+}
+
+}
+
+class Next extends React.Component{
+
+constructor(props){
+
+super(props);
+
+
+}
+
+render()
+{
+
+  return(
+
+       <input type="button" value="Next >>" id='action' onClick={()=>this.props.doAjax(this.props.link)} />
+
+  )
+
+}
+
+
+}
+
+class App extends React.Component{
+
+
+
+constructor(props)
+{
+  super(props);
+
+  this.state={
+
+  list:list
+
+  };
+
+this.doAjax = this.doAjax.bind(this);
+this.checkAnswer=this.checkAnswer.bind(this);
+this.doReset=this.doReset.bind(this);
+}
+
+//BEGINNING OF DO RESET
+
+   doReset=()=>{
+	     let radio_button=document.querySelectorAll('input[name="option"]');
+	      for(const i in radio_button)
+	      {
+	        if(radio_button[i].checked)
+	        {
+	          radio_button[i].checked=false;
+	       }
+
+          }
+    }
+
+
+//END OF DORESET
+
+
+
+//BEGINNING OF DO AJAX FUNCTION
+
+	doAjax=(url)=>{
+      let self=this;
+		$.ajax({
+
+		url:url,
+		type:'GET',
+		success:function(result){
+
+
+           let lists=[{
+           question:result[0].question.text,
+           answer:[result[0].correctAnswer],
+           optiona:[result[0].incorrectAnswers[0]],
+           optionb:[result[0].incorrectAnswers[1]],
+           optionc:[result[0].incorrectAnswers[2]],
+           score:self.state.score,
+           checked:false
+
+           }]
+           self.setState({list:lists});
+
+           self.doReset();
+
+		},
+		error:function(error){alert(error)}
+
+
+
+		})
+
+
+
+	}
+
+//END OF DO AJAX FUNCTION
+
+
+//BEGINNING OF CHECK ANSWER
+
+   checkAnswer=(e)=>{
+
+    let score=this.state.list[0].score;
+
+     if(this.state.list[0].answer==e.target.value){
+     score+=1;
+
+		 this.setState({score:score })
+
+     }
+
+
+   }
+
+//END OF CHECK ANSWER
+
+render(){
+
+	return(
+
+	   <div>
+		<Header />
+		<Content list={this.state.list} score={this.state.list[0].score}/>
+		<Footer list={this.state.list}  checkAnswer={this.checkAnswer} checked={this.state.list[0].checked} />
+		<Next doAjax={this.doAjax} link='https://the-trivia-api.com/v2/questions' />
+	   </div>
+	)
+
+}
+
+
+
+}
+
+ReactDOM.render(<App/>,document.querySelector('#root'));
+
+
+
+
+
+</script>
+
+</body>
+
+</html>
