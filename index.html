@@ -7,7 +7,8 @@
     <script src="../demo_one/react-dom.development.js"></script>
     <script src="../demo_one/babel.min.js"></script>
     <script src="../demo_one/jquery.min.js"></script>
-    </style>
+    <link href='custom.css' rel='stylesheet' />
+
 </head>
 <body>
 
@@ -19,12 +20,8 @@
 	let list=[{
 
 	question:'This program was coded in what programming language? ',
-	answer:['Reactjs'],
-	optiona:['Php'],
-	optionb:['Java'],
-	optionc:['Python'],
-    score:0,
-    checked:false
+	options:[{'answer':'Reactjs','optiona':'Php','optionb':'Java','optionc':'Python'}],
+    score:0
 
 	}]
 
@@ -37,7 +34,7 @@ class Header extends React.Component{
 render()
 {
  return(
-  <div>
+  <div className='header'>
    <h1>QA - Quiz App Using Trivia API</h1>
   </div>
  )
@@ -61,17 +58,22 @@ class Content extends React.Component{
        return(
 
 
-           <div>
-          {this.props.list.map(function(item,i){
+           <div  className='tarea'>
+          {
+
+          this.props.list.map(function(item,i){
 
           return (
           <div key={i}>
-          <textarea cols='100' rows='10' value={item.question} readOnly/>
-           <strong>{item.score}</strong>
+          <textarea  rows='4' value={item.question} readOnly/>
+           <strong>Score: {item.score}</strong>
           </div>
            )
 
-          })}
+          })
+
+
+          }
 
  			</div>
 
@@ -87,38 +89,58 @@ class Footer extends React.Component{
 constructor(props)
 {
  super(props);
+ this.randomKey=this.randomKey.bind(this);
+}
+
+randomKey(obj)
+{
+
+ 	 let key=Object.keys(obj);
+ 	if(this.props.score%3==Math.floor(Math.random()*2))
+ 	{
+ 	  key=key.sort()
+ 	}else
+ 	{
+
+ 	if(this.props.score%3==Math.floor(Math.random()*1))
+ 	 key=key.reverse()
+	}
+
+	return key
+
 
 }
 
 render()
 {
 
+
    return(
-    <div>
+    <div className='options'>
 <br/>
-    {
+
+    {       (this.props.list)?
 
 
-
-		 this.props.list.map((item,i)=>{
-
+		    this.props.list.map((item,i)=>{
+		    let k=this.randomKey(item)
 			return(
 			<div key={i} >
-            <input type='radio' name='option' onClick={(event)=>this.props.checkAnswer(event)} value={item.answer} />
-			{item.answer}<br/>
-            <input type='radio' name='option' onClick={(event)=>this.props.checkAnswer(event)} value={item.optiona}/>
-            {item.optiona}<br/>
-            <input type='radio' name='option' onClick={(event)=>this.props.checkAnswer(event)} value={item.optionb} />
-            {item.optionb}<br/>
-             <input type='radio' name='option' onClick={(event)=>this.props.checkAnswer(event)} value={item.optionc} />
-            {item.optionc}<br/>
+            <input type='radio' name='option' className='option' onClick={(event)=>this.props.checkAnswer(event)} value={item[k[0]]} />
+			<label>{item.answer}</label><br/><br/>
+            <input type='radio' name='option' className='option' onClick={(event)=>this.props.checkAnswer(event)} value={item[k[1]]}/>
+            <label>{item.optiona}</label><br/><br/>
+            <input type='radio' name='option' className='option' onClick={(event)=>this.props.checkAnswer(event)} value={item[k[2]]} />
+            <label>{item.optionb}</label><br/><br/>
+             <input type='radio' name='option' className='option' onClick={(event)=>this.props.checkAnswer(event)} value={item[k[3]]} />
+            <label>{item.optionc}</label><br/><br/>
             </div>
 
 			)
 
 		 })
 
-
+        :''
 
     }
    <br/> </div>
@@ -143,9 +165,9 @@ render()
 {
 
   return(
-
+      <div className='next'>
        <input type="button" value="Next >>" id='action' onClick={()=>this.props.doAjax(this.props.link)} />
-
+      </div>
   )
 
 }
@@ -189,7 +211,13 @@ this.doReset=this.doReset.bind(this);
 
 //END OF DORESET
 
+componentDidMount()
+{
 
+//this.doAjax('https://the-trivia-api.com/v2/questions');
+
+
+}
 
 //BEGINNING OF DO AJAX FUNCTION
 
@@ -204,20 +232,15 @@ this.doReset=this.doReset.bind(this);
 
            let lists=[{
            question:result[0].question.text,
-           answer:[result[0].correctAnswer],
-           optiona:[result[0].incorrectAnswers[0]],
-           optionb:[result[0].incorrectAnswers[1]],
-           optionc:[result[0].incorrectAnswers[2]],
-           score:self.state.score,
-           checked:false
-
+           options:[{'answer':result[0].correctAnswer,'optiona':result[0].incorrectAnswers[0],'optionb':result[0].incorrectAnswers[1],'optionc':result[0].incorrectAnswers[2]}],
+           score:self.state.score
            }]
            self.setState({list:lists});
 
            self.doReset();
 
 		},
-		error:function(error){alert(error)}
+		error:function(error){console.log(error)}
 
 
 
@@ -234,15 +257,12 @@ this.doReset=this.doReset.bind(this);
 
    checkAnswer=(e)=>{
 
-    let score=this.state.list[0].score;
-
-     if(this.state.list[0].answer==e.target.value){
-     score+=1;
-
-		 this.setState({score:score })
-
-     }
-
+	     let score=this.state.list[0].score;
+	     if(this.state.list[0].options[0].answer.toUpperCase()==e.target.value.toUpperCase())
+	     {
+	       score+=1;
+	     }
+           this.setState({score:score})
 
    }
 
@@ -252,12 +272,12 @@ render(){
 
 	return(
 
-	   <div>
+	   <div className='container'>
 		<Header />
 		<Content list={this.state.list} score={this.state.list[0].score}/>
-		<Footer list={this.state.list}  checkAnswer={this.checkAnswer} checked={this.state.list[0].checked} />
+		<Footer list={this.state.list[0].options}  checkAnswer={this.checkAnswer} checked={this.state.list[0].checked} score={this.state.list[0].score} />
 		<Next doAjax={this.doAjax} link='https://the-trivia-api.com/v2/questions' />
-	   </div>
+  		</div>
 	)
 
 }
